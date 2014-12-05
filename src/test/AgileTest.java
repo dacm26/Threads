@@ -57,7 +57,7 @@ public class AgileTest extends javax.swing.JFrame {
 
         jLabel2.setText("INPUT FILE");
 
-        inputFile.setText("Select a File");
+        inputFile.setText("Select a Folder");
         inputFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 inputFileActionPerformed(evt);
@@ -161,19 +161,17 @@ public class AgileTest extends javax.swing.JFrame {
 
     private void inputFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputFileActionPerformed
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new FileNameExtensionFilter("CSV FILES", "csv", "csv"));
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.setDialogTitle("Select a Directory");
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         try {
             int returnValue = fileChooser.showOpenDialog(null);
             if (returnValue == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
                 String name = selectedFile.getName();
                 String ext = name.substring(name.length() - 3, name.length());
-                if (ext.equals("csv")) {
-                    this.fileName.setText(selectedFile.getName());
-                    this.inputFilePath = selectedFile.getPath();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Error, You need a csv File");
-                }
+                this.fileName.setText(selectedFile.getName());
+                this.inputFolderPath = selectedFile.getPath();
 
             }
         } catch (HeadlessException e) {
@@ -189,6 +187,7 @@ public class AgileTest extends javax.swing.JFrame {
     private void outputFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_outputFileActionPerformed
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter("CSV FILES", "csv", "csv"));
+        fileChooser.setAcceptAllFileFilterUsed(false);
         try {
             int returnValue = fileChooser.showOpenDialog(null);
             if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -221,12 +220,12 @@ public class AgileTest extends javax.swing.JFrame {
     }//GEN-LAST:event_outputFileNameActionPerformed
 
     private void createButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createButtonActionPerformed
-        if (this.inputFilePath.isEmpty() || this.outputFilePath.isEmpty()) {
+        if (this.inputFolderPath.isEmpty() || this.outputFilePath.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Error, You need an input and output file");
         } else {
-            DiskInputThread DIT = new DiskInputThread(this.inputFilePath);
-            ProcessingThread PT= new ProcessingThread(DIT.getBacklog());
-            DiskOutputThread DOT = new DiskOutputThread(this.outputFilePath,PT.getDOT_backlog());
+            DiskInputThread DIT = new DiskInputThread(this.inputFolderPath);
+            ProcessingThread PT = new ProcessingThread(DIT.getBacklog());
+            DiskOutputThread DOT = new DiskOutputThread(this.outputFilePath, PT.getDOT_backlog());
             DIT.start();
             PT.start();
             DOT.start();
@@ -236,8 +235,13 @@ public class AgileTest extends javax.swing.JFrame {
     }//GEN-LAST:event_createButtonActionPerformed
 
     private void createButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createButton1ActionPerformed
-        this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+        try{
+            this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+        }catch(Exception e){
+            
+        }
         
+
 // TODO add your handling code here:
     }//GEN-LAST:event_createButton1ActionPerformed
 
@@ -287,7 +291,7 @@ public class AgileTest extends javax.swing.JFrame {
     private javax.swing.JButton outputFile;
     private javax.swing.JTextField outputFileName;
     // End of variables declaration//GEN-END:variables
-    private String inputFilePath = "";
+    private String inputFolderPath = "";
     private String outputFilePath = "";
 
 }
