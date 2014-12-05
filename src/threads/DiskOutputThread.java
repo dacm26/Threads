@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import test.Person;
@@ -19,26 +20,31 @@ import test.Person;
  */
 public class DiskOutputThread extends Thread {
 
-    private String file;
-    private Person person;
+    private Stack<Person> backlog;
+    private String outputPath;
 
-    public DiskOutputThread(String file, Person person) {
-        this.file = file;
-        this.person = person;
+    public DiskOutputThread(String outputPath,Stack<Person> backlog) {
+        this.outputPath = outputPath;
+        this.backlog = backlog;
     }
 
     @Override
     public void run() {
         PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(new BufferedWriter(new FileWriter(
-                    this.file, true)));
-            pw.println(this.person.toString());
+        while (true) {
+            if (!(this.backlog.isEmpty())) {
+                try {
+                    pw = new PrintWriter(new BufferedWriter(new FileWriter(
+                            this.outputPath, true)));
+                    Person temp=this.backlog.pop();
+                    pw.println(temp.toString());
 
-        } catch (IOException ex) {
-            Logger.getLogger(DiskOutputThread.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
-            pw.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(DiskOutputThread.class.getName()).log(Level.SEVERE, null, ex);
+                } finally {
+                    pw.close();
+                }
+            }
         }
 
     }

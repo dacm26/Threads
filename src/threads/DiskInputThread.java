@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import test.Person;
+import java.util.Stack;
 
 /**
  *
@@ -21,12 +22,12 @@ import test.Person;
 public class DiskInputThread extends Thread {
 
     private String fileName;
-    private String outputFileName;
     private BufferedReader file;
+    private Stack<Person> backlog;
 
-    public DiskInputThread(String outputFileName, String fileName) {
+    public DiskInputThread(String fileName) {
         this.fileName = fileName;
-        this.outputFileName = outputFileName;
+        backlog = new Stack<>();
         try {
             this.file = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
         } catch (FileNotFoundException ex) {
@@ -34,13 +35,6 @@ public class DiskInputThread extends Thread {
         }
     }
 
-    public String getOutputFileName() {
-        return outputFileName;
-    }
-
-    public void setOutputFileName(String outputFileName) {
-        this.outputFileName = outputFileName;
-    }
 
     public String getFileName() {
         return fileName;
@@ -50,28 +44,52 @@ public class DiskInputThread extends Thread {
         this.fileName = fileName;
     }
 
+    public BufferedReader getFile() {
+        return file;
+    }
+
+    public void setFile(BufferedReader file) {
+        this.file = file;
+    }
+
+    public Stack<Person> getBacklog() {
+        return backlog;
+    }
+
+    public void setBacklog(Stack<Person> backlog) {
+        this.backlog = backlog;
+    }
+    
+    
+    
     @Override
     public void run() {
         String splitBy = ",";
-        String line="";
+        String line = "";
         try {
             line = this.file.readLine();
         } catch (IOException ex) {
             Logger.getLogger(DiskInputThread.class.getName()).log(Level.SEVERE, null, ex);
         }
-        while (line != null) {
-            String[] b = line.split(splitBy);
-            Person temp = new Person(b);
-            ProcessingThread PT = new ProcessingThread(temp,this.outputFileName);
-            PT.start();
-            try {
-                line = this.file.readLine();
-            } catch (IOException ex) {
-                Logger.getLogger(DiskInputThread.class.getName()).log(Level.SEVERE, null, ex);
+        while (true) {
+            if (line != null) {
+                String[] b = line.split(splitBy);
+                Person temp = new Person(b);
+                backlog.push(temp);
+                try {
+                    line = this.file.readLine();
+                } catch (IOException ex) {
+                    Logger.getLogger(DiskInputThread.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                try {
+                    line = this.file.readLine();
+                } catch (IOException ex) {
+                    Logger.getLogger(DiskInputThread.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+
         }
     }
 
 }
-
-
